@@ -1,141 +1,102 @@
-class itemz:
+"""Modulo de carrito de compras para calcular el precio"""
+
+class Item:
+    """Clase Item para el carro de compras"""
 
     def __init__(self, name, price, qty):
-
+        """Inicialización de items"""
         self.name = name
-
         self.price = price
-
         self.qty = qty
-
         self.category = "general"
-
         self.env_fee = 0
 
-
-
-    def getTotal(self):
-
+    def get_total(self):
+        """Calculate the total price for this item."""
         return self.price * self.qty
 
-    def getTMostPrices(self):
-
+    def get_total_with_discount(self):
+        """Calculate the discounted total price for this item."""
         return self.price * self.qty * 0.6
 
 
-
-#class to shop
-
-class shoppinCart:
+class ShoppingCart:
+    """Class representing a shopping cart."""
 
     def __init__(self):
-
+        """Initialize the shopping cart with an empty item list and default rates."""
         self.items = []
-
-        self.taxRate = 0.08
-
-        self.memberDiscount = 0.05
-
-        self.bigSpenderDiscount = 10
-
-        self.couponDiscount = 0.15
-
+        self.tax_rate = 0.08
+        self.member_discount = 0.05
+        self.big_spender_discount = 10
+        self.coupon_discount = 0.15
         self.currency = "USD"
 
-
-
-    def addItem(self, item):
-
-#discount added here
-
+    def add_item(self, item):
+        """Add an item to the shopping cart."""
         self.items.append(item)
 
-
-
-    def calculateSubtotal(self):
-
-#todo: fix this in the future i guess
-
+    def calculate_subtotal(self):
+        """Calculate the subtotal of all items in the cart."""
         subtotal = 0
-
         for item in self.items:
-
-            subtotal += item.getTotal()
-
+            subtotal += item.get_total()
         return subtotal
 
-
-
-    def applyDiscounts(self, subtotal, isMember, hasCoupon):
-
-        if isMember == "yes":
-
-            subtotal = subtotal - (subtotal * self.memberDiscount)
+    def apply_discounts(self, subtotal, is_member, has_coupon):
+        """Descuento según membresia y cupones"""
+        if is_member:
+            subtotal -= subtotal * self.member_discount
 
         if subtotal > 100:
+            subtotal -= self.big_spender_discount
 
-            subtotal = subtotal - self.bigSpenderDiscount
+        if has_coupon:
+            subtotal -= subtotal * self.coupon_discount 
 
         return subtotal
 
+    def calculate_total(self, is_member, has_coupon):
+        """Calculo total considerando descuentos"""
+        subtotal = self.calculate_subtotal()
 
+        for item in self.items:
+            if item.category == "electronics":
+                subtotal += item.qty * 5 
 
-    def calculateTotal(self, isMember, hasCoupon):
+        subtotal = self.apply_discounts(subtotal, is_member, has_coupon)
 
-#why i need this? @user
+        total = subtotal + (subtotal * self.tax_rate)
 
-        subtotal = self.calculateSubtotal()
-
-        subtotal = self.applyDiscounts(subtotal, isMember, hasCoupon)
-
-        total = subtotal + (subtotal * self.taxRate)
-
-        if hasCoupon == "YES":
-
-            total = total - (total * self.couponDiscount)
+        if has_coupon:
+            total -= total * self.coupon_discount
 
         return total
 
 
-
 def main():
-
-    cart = shoppinCart()
-
-    item1 = itemz("Apple", 1.5, 10)
-
-    item2 = itemz("Banana", 0.5, 5)
-
-    item3 = itemz("Laptop", "1000", 1)
+    """Funcionalidad principal """
+    cart = ShoppingCart()
+    item1 = Item("Apple", 1.5, 10)
+    item2 = Item("Banana", 0.5, 5)
+    item3 = Item("Laptop", 1000, 1)
 
     item3.category = "electronics"
 
-    cart.addItem(item1)
+    cart.add_item(item1)
+    cart.add_item(item2)
+    cart.add_item(item3)
 
-    cart.addItem(item2)
+    is_member = True
+    has_coupon = True
 
-    cart.addItem(item3)
-
-    isMember = True
-
-    hasCoupon = "YES"
-
-
-
-    total = cart.calculateTotal(isMember, hasCoupon)
-
-
+    total = cart.calculate_total(is_member, has_coupon)
 
     if total < 0:
-
         print("Error in calculation!")
-
     else:
-
-        print("The total price is: $" + str(int(total)))
-
+        print("The total price is: $" + str(round(total, 2)))
 
 
 if __name__ == "__main__":
-
     main()
